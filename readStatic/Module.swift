@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CryptoKit
 
 fileprivate let fileManager = FileManager.default
 
@@ -27,8 +28,8 @@ func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
     var ofIndex = data.startIndex
 
     repeat {
-        if let index = data[currentIndex...data.endIndex - 1].firstIndex(where: { Character(UnicodeScalar($0)) == newLineSeparator
-        }) {
+        if let index = data[currentIndex...data.endIndex - 1].firstIndex(where: { Character(UnicodeScalar($0)) == newLineSeparator}) {
+            
             currentIndex = index
             //print(String(bytes: data[ofIndex...currentIndex], encoding: .utf8)!)
 
@@ -38,7 +39,7 @@ func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
                 continue
             }
 
-            handlerNewLine(newLine)
+            handlerNewLine(newLine.trimmingCharacters(in: .newlines))
 
             ofIndex = index
             currentIndex += 1
@@ -47,3 +48,13 @@ func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
         }
     } while true
 }
+
+func sha256(data: String) -> String {
+    guard let personalNumber = data.data(using: .utf8) else {
+        fatalError("*** This method should never fail - get hashed number***")
+    }
+    let hashed = SHA256.hash(data: personalNumber)
+    //print(hashed.compactMap { String(format: "%02x", $0) }.joined())
+    return hashed.compactMap { String(format: "%02x", $0) }.joined()
+}
+

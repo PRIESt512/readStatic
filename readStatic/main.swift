@@ -23,8 +23,8 @@ readLineOfFile(for: pathCore) { newLine in
     }
     let subStr = line.split(separator: semicolonSeparator)
     let newName = String(subStr[subStr.startIndex])
-    let newId = Int(String(subStr[subStr.startIndex + 1])) ?? 0
-    person.append(User(name: newName, personNumber: newId))
+    let newId = String(subStr[subStr.startIndex + 1])
+    person.append(User(name: newName, personNumber: newId, steps:[]))
 }
 
 //print(newLines[newLines.startIndex])
@@ -51,11 +51,48 @@ readLineOfFile(for: pathStepMetrics) { newLine in
     }
 
     let newPersonNumber = String(subStr[subStr.startIndex + 4])
-    let trimmingString = newPersonNumber.trimmingCharacters(in: .newlines)
-    if personStepMetrics[trimmingString] == nil {
-        personStepMetrics[trimmingString] = []
+    if personStepMetrics[newPersonNumber] == nil {
+        personStepMetrics[newPersonNumber] = []
     }
-    personStepMetrics[trimmingString]?.append(StepMetrics(endDate: newEndDate, startDate: newStartDate, value: newValue, personNumber: trimmingString))
+    personStepMetrics[newPersonNumber]?.append(StepMetrics(endDate: newEndDate, startDate: newStartDate, value: newValue, personNumber: newPersonNumber))
 }
 
-print("REr")
+print("Поиск совпадений")
+
+var personNumber = ""
+var countStep = 0
+var countPerson = 0
+for var item in person {
+    personNumber = item.personNumber
+    for index in 0...50 {
+        let hash = sha256(data: personNumber)
+        let steps = personStepMetrics[hash]
+        personNumber = hash
+        guard let addSteps = steps else {
+            //print("Нет - \(idPers)")
+            continue
+        }
+        item.addSteps(addSteps)
+        print("Person \(item.name) added steps \(addSteps.count); index = \(index)")
+        countStep += addSteps.count
+        countPerson += 1
+        
+        personStepMetrics.remove(at: personStepMetrics.index(forKey: hash)!)
+    }
+}
+
+print("Поиск по шагам окончен; всего добавлено - \(countStep) шагов для уникальный хешей - \(countPerson)")
+print("Осталось - \(personStepMetrics.count)")
+
+//var start = "01690451"
+//var personNumber = start
+//for index in 0...20 {
+//    let hash = sha256(data: personNumber)
+//    personNumber = hash
+//    let pers = personStepMetrics[hash]
+//    guard let id = pers else {
+//        continue
+//    }
+//    print("Pers - \(hash) - \(id.count) - \(index)")
+//}
+
