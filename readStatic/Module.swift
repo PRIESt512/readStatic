@@ -28,8 +28,8 @@ func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
     var ofIndex = data.startIndex
 
     repeat {
-        if let index = data[currentIndex...data.endIndex - 1].firstIndex(where: { Character(UnicodeScalar($0)) == newLineSeparator}) {
-            
+        if let index = data[currentIndex...data.endIndex - 1].firstIndex(where: { Character(UnicodeScalar($0)) == newLineSeparator }) {
+
             currentIndex = index
             //print(String(bytes: data[ofIndex...currentIndex], encoding: .utf8)!)
 
@@ -58,3 +58,27 @@ func sha256(data: String) -> String {
     return hashed.compactMap { String(format: "%02x", $0) }.joined()
 }
 
+func bugSHA(data: String) -> String {
+    guard let personalNumber = data.data(using: .utf8) else {
+        fatalError("*** This method should never fail - get hashed number***")
+    }
+    let hashed = SHA256.hash(data: personalNumber)
+    var str2 = ""
+    for item in hashed {
+        str2 += String(format: "%02x", item)
+    }
+    if(str2[str2.startIndex] == "0") {
+        str2.removeFirst();
+    }
+    if(str2[str2.startIndex] == "0") {
+        str2.removeFirst();
+    }
+    if(str2[str2.startIndex] == "0") {
+        str2.removeFirst();
+    }
+    if(str2[str2.startIndex] == "0") {
+        str2.removeFirst();
+    }
+    return str2
+    //return hashed.compactMap { String($0, radix: 16) }.joined()
+}

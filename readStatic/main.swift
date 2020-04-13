@@ -24,10 +24,14 @@ readLineOfFile(for: pathCore) { newLine in
     let subStr = line.split(separator: semicolonSeparator)
     let newName = String(subStr[subStr.startIndex])
     let newId = String(subStr[subStr.startIndex + 1])
-    person.append(User(name: newName, personNumber: newId, steps:[]))
+    person.append(User(name: newName, personNumber: newId, steps: []))
 }
 
 //print(newLines[newLines.startIndex])
+
+//test(person: person)
+//print(bugSHA(data: "88b0fd3a654de2c23e5bd474f92443540f03cacb6a5649d4188c2a7bbf6c30ec"))
+//exit(0)
 
 //Читаем шаги по всем пользователям и собираем
 let dateFormatter = DateFormatter()
@@ -65,18 +69,28 @@ var countPerson = 0
 for var item in person {
     personNumber = item.personNumber
     for index in 0...50 {
-        let hash = sha256(data: personNumber)
+        var hash = ""
+        if(index <= 28) {
+            hash = sha256(data: personNumber)
+        } else {
+            hash = bugSHA(data: personNumber)
+        }
         let steps = personStepMetrics[hash]
         personNumber = hash
+
+//        if(item.name == "Саша Вдовина"){
+//            print(personNumber)
+//        }
+
         guard let addSteps = steps else {
             //print("Нет - \(idPers)")
             continue
         }
         item.addSteps(addSteps)
-        print("Person \(item.name) added steps \(addSteps.count); index = \(index)")
+        print("Person - \(item.name) added steps \(addSteps.count); index = \(index)")
         countStep += addSteps.count
         countPerson += 1
-        
+
         personStepMetrics.remove(at: personStepMetrics.index(forKey: hash)!)
     }
 }
@@ -95,4 +109,5 @@ print("Осталось - \(personStepMetrics.count)")
 //    }
 //    print("Pers - \(hash) - \(id.count) - \(index)")
 //}
+
 
