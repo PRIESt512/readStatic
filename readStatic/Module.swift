@@ -10,6 +10,8 @@ import Foundation
 import CryptoKit
 
 fileprivate let fileManager = FileManager.default
+fileprivate var fileHandleWriter: Optional<FileHandle> = nil
+fileprivate let newLine = "\n".data(using: .utf8)!
 
 func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
     if !fileManager.fileExists(atPath: path) {
@@ -49,6 +51,29 @@ func readLineOfFile(for path: String, _ handlerNewLine: (String?) -> Void) {
     } while true
 }
 
+func writeLineFile(_ line: String) {
+    if fileHandleWriter == nil {
+        if !fileManager.fileExists(atPath: statisctics) {
+            if !fileManager.createFile(atPath: statisctics, contents: nil, attributes: nil) {
+               print("Ошибка создания файла")
+            }
+        }
+        fileHandleWriter = FileHandle(forWritingAtPath: statisctics)
+    }
+    
+    guard let data = line.data(using: .utf8) else {
+        print("Ошибка записи в файл")
+        return
+    }
+    
+    fileHandleWriter?.write(data)
+    fileHandleWriter?.write(newLine)
+}
+
+func closeFile() {
+    fileHandleWriter?.closeFile()
+}
+
 func sha256(data: String) -> String {
     guard let personalNumber = data.data(using: .utf8) else {
         fatalError("*** This method should never fail - get hashed number***")
@@ -63,22 +88,14 @@ func bugSHA(data: String) -> String {
         fatalError("*** This method should never fail - get hashed number***")
     }
     let hashed = SHA256.hash(data: personalNumber)
-    var str2 = ""
-    for item in hashed {
-        str2 += String(format: "%02x", item)
+    
+    var hash = hashed.compactMap { String(format: "%02x", $0) }.joined()
+    
+    for _ in 0...5 {
+        if(hash[hash.startIndex] == "0") {
+            hash.removeFirst()
+        }
     }
-    if(str2[str2.startIndex] == "0") {
-        str2.removeFirst();
-    }
-    if(str2[str2.startIndex] == "0") {
-        str2.removeFirst();
-    }
-    if(str2[str2.startIndex] == "0") {
-        str2.removeFirst();
-    }
-    if(str2[str2.startIndex] == "0") {
-        str2.removeFirst();
-    }
-    return str2
-    //return hashed.compactMap { String($0, radix: 16) }.joined()
+    
+    return hash
 }

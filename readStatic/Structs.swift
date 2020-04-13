@@ -14,23 +14,60 @@ struct User: CustomDebugStringConvertible {
     }
 
     let name: String
+    let vsp: String
     let personNumber: String
-    var steps: [StepMetrics]
+    var steps: Set<StepMetrics>
+    var histogramSteps: Dictionary<String, Int> = [:]
 
     mutating func addSteps(_ steps: [StepMetrics]) {
-        self.steps += steps
+        self.steps.formUnion(steps)
+    }
+    
+    mutating func setHistogram(_ hist: Dictionary<String, Int>) {
+        self.histogramSteps = hist
     }
 }
 
 struct StepMetrics: CustomDebugStringConvertible {
     var debugDescription: String {
-        String(format: "StartDate - %@, EndDate - %@, Value - %E, Number - $@", self.startDate.debugDescription, self.endDate.debugDescription, self.value, self.personNumber)
+        String(format: "StartDate - %@, EndDate - %@, Value - %f, Number - $@", self.startDate.debugDescription, self.endDate.debugDescription, self.value, self.personNumber)
     }
 
     let endDate: Date
     let startDate: Date
     let value: Double
     let personNumber: String
+}
+
+extension StepMetrics: Hashable {
+
+    static func == (lhs: StepMetrics, rhs: StepMetrics) -> Bool {
+        return lhs.endDate == rhs.endDate &&
+            lhs.startDate == rhs.startDate &&
+            lhs.value == rhs.value &&
+            lhs.personNumber == rhs.personNumber
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(endDate)
+        hasher.combine(startDate)
+        hasher.combine(value)
+        hasher.combine(personNumber)
+    }
+}
+
+extension StepMetrics: Comparable {
+    static func < (lhs: StepMetrics, rhs: StepMetrics) -> Bool {
+        if lhs.startDate != rhs.startDate {
+            return lhs.startDate < rhs.startDate
+        } else if lhs.endDate != rhs.endDate {
+            return lhs.endDate < rhs.endDate
+        } else if lhs.value != rhs.value {
+            return lhs.value < rhs.value
+        } else {
+            return lhs.personNumber < rhs.personNumber
+        }
+    }
 }
 
 func test(person: [User]) {
